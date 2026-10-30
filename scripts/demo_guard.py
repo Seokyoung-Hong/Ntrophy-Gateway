@@ -221,6 +221,8 @@ def main():
     ap.add_argument("--mode", choices=["mock", "vllm"], default="mock")
     ap.add_argument("--capture", action="store_true", help="비교 대신 기준선 저장")
     a = ap.parse_args()
+    if not a.capture and not BASE.exists():
+        sys.exit(f"기준선 파일 {BASE} 이 없다. 먼저 --capture로 기준선을 저장한 뒤 비교를 실행한다.")
     try:
         run(a.gw.rstrip("/"), a.mock.rstrip("/"))
     except Exception as e:  # 시나리오 중단도 FAIL로 센다

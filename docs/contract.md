@@ -117,7 +117,7 @@ STANDBY가 없으면 timeline에 실패로 기록하고 status BLOCKED 유지.
 - 구 스키마 DB(`incident.limit_calls` 없음)는 서버 시작 시 자동으로 재생성된다(데모 데이터 삭제됨).
 
 ## F. 청중 라이브 데모 (Mock Provider, port 9000)
-청중이 "유출된 키"(`LEAKED_KEY` = 시드 K1)로 게이트웨이를 거치지 않고 공급자에 직접 호출 → 탐지기가 호출 수 차이로 감지. 실행 절차는 `scripts/live.md`.
+청중이 "유출된 키"(`LEAKED_KEY` = 시드 K1)로 게이트웨이를 거치지 않고 공급자에 직접 호출 → 탐지기가 호출 수 차이로 감지.
 - `GET /live` → 청중용 채팅 HTML(`app/mock_provider/live.html`, 스타일 클래스 `.live-*`, 상태는 `body[data-state=active|busy|revoked|limited]`).
 - `GET /live/config` → `{key, model}` (key = `data/live_key.json`의 OpenRouter 키, 없으면 `LEAKED_KEY`)
 - `POST /live/chat` `{key, message}` → 200 `{reply, status:200}` / 401 `{error:"revoked"}` / 429 `{error:"rate_limited"}` / 502 `{error:"upstream_error", upstream_status?}`(OpenRouter 경로만).

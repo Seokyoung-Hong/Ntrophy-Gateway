@@ -63,7 +63,7 @@
 
 ## 3. 시연 준비 체크리스트
 - [ ] Mock 리허설 `scripts/rehearse.py` PASS
-- [ ] 라이브 모드: `.env`의 OpenRouter 키, `POST /demo/reset-openrouter`, 터널 주소와 QR, `scripts/live.md` 절차(테스트 서버 sio2.kr은 실제 키 없이 Mock만 동작)
+- [ ] 라이브 모드: `.env`의 OpenRouter 키, `POST /demo/reset-openrouter`, 터널 주소와 QR(테스트 서버 sio2.kr은 실제 키 없이 Mock만 동작)
 - [ ] 청중 규모에 맞게 한도 조정(작으면 WARNING 단계를 건너뛸 수 있고, 청중이 빠르면 최종 손실이 한도에 근접)
 - [ ] 네트워크 장애 백업: 공격 시뮬레이터 버튼
 
