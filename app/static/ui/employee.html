@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>직원 AI 채팅</title>
+<meta name="description" content="직원용 채팅 페이지. 게이트웨이 토큰으로 호출하며, 유출 키가 폐기돼도 예비 키로 끊김 없이 이어진다.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="css/app.css?v=6">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2303b26c'/%3E%3Ccircle cx='16' cy='12' r='5' fill='white'/%3E%3Cpath d='M7 26c1.5-5 5-7 9-7s7.5 2 9 7' fill='white'/%3E%3C/svg%3E">
+</head>
+<body class="chat-body" data-state="active">
+<div class="chat-app">
+  <header class="chat-top">
+    <div class="chat-top-row">
+      <h1>직원 AI 채팅</h1>
+      <div class="spacer"></div>
+      <span class="badge ok" id="lastCode">대기 중</span>
+    </div>
+    <div class="chat-stats">
+      <span class="badge blue" id="who">직원A</span>
+      <span class="badge ghost">게이트웨이 경유</span>
+      <span class="badge ghost key-flip" id="curKey">공급자 키 —</span>
+    </div>
+  </header>
+
+  <section class="chat-intro">
+    <h2>공급자 키 없이<br>게이트웨이 토큰으로 써요</h2>
+    <p>유출된 키가 차단돼도 게이트웨이가 예비 키로 바꿔서, 같은 토큰으로 계속 대화할 수 있어요.</p>
+    <div class="card tight" style="margin-top:16px;background:var(--surface-2)">
+      <div class="field" style="margin-bottom:12px"><span>누구로 호출할까요?</span><div class="seg full" id="whoSeg"></div></div>
+      <div class="field" style="margin-bottom:12px"><span>어디에서 호출할까요?</span>
+        <div class="seg full" id="ipSeg"><button data-ip="" aria-pressed="true">사내망</button><button data-ip="203.0.113.57" aria-pressed="false">외부 카페 Wi-Fi</button></div></div>
+      <div class="field" id="tokField" style="margin-bottom:0" hidden><span>게이트웨이 토큰</span><input class="input mono" id="tokIn" placeholder="nvm-..." spellcheck="false"><small>콘솔에서 발급한 토큰(nvm-…)이나 WIF JWT를 붙여 넣으세요. 같은 브라우저에서 데모를 초기화하면 자동으로 채워져요</small></div>
+      <button class="btn block danger-soft" id="attackBtn" style="margin-top:12px" hidden></button>
+    </div>
+  </section>
+
+  <div class="msgs" id="msgs" aria-live="polite"></div>
+  <div class="suggest" id="suggest"></div>
+  <div class="composer">
+    <form id="form">
+      <textarea id="input" rows="1" maxlength="300" placeholder="업무 질문을 입력하세요" aria-label="메시지"></textarea>
+      <button class="btn send" id="send" aria-label="보내기"></button>
+    </form>
+    <span class="count" id="count">0 / 300</span>
+  </div>
+</div>
+
+<script src="js/sim.js?v=6"></script>
+<script src="js/api.js?v=6"></script>
+<script src="js/ui.js?v=6"></script>
+<script src="js/employee.js?v=6"></script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ntrophy Gateway</title>
+<meta name="description" content="AI API 키 유출을 사용량 대조로 찾아내고 자동으로 차단하는 게이트웨이 관리 콘솔">
+<meta name="theme-color" content="#f1f4f7">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="css/app.css?v=6">
+<link rel="icon" type="image/png" href="assets/logo-mark.png">
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="logo">
+      <span class="logo-mark"><img src="assets/logo-mark.png" alt="" width="28" height="28"></span>
+      <div>Ntrophy Gateway<small>AI 키 유출 탐지·자동 차단</small></div>
+    </div>
+    <nav id="nav" aria-label="주 메뉴"></nav>
+    <div class="side-foot">
+      <div class="nav-label">시연용 화면</div>
+      <a class="nav-btn" href="live.html" target="_blank" rel="noopener"><span data-ic="users"></span>공격자 채팅<span data-ic="external" class="ext"></span></a>
+      <a class="nav-btn" href="employee.html" target="_blank" rel="noopener"><span data-ic="user"></span>직원 채팅<span data-ic="external" class="ext"></span></a>
+    </div>
+  </aside>
+
+  <header class="topbar">
+    <span class="top-brand"><span class="logo-mark"><img src="assets/logo-mark.png" alt="" width="28" height="28"></span>Ntrophy</span>
+    <button class="chip" id="connChip" title="서버 연결 설정"><span class="led"></span><span id="connText">연결 확인 중</span></button>
+    <div class="spacer"></div>
+    <button class="icon-btn" id="themeBtn" aria-label="화면 테마 바꾸기"></button>
+    <button class="btn sm" id="demoBtn" aria-label="데모 제어"><span data-ic="play"></span><span class="fab-label">데모 제어</span></button>
+  </header>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="page-head"><h1 id="pageTitle">홈</h1><p id="pageSub"></p></div>
+      <div id="banner"></div>
+      <div id="view"></div>
+    </div>
+  </main>
+</div>
+<nav class="tabbar" id="tabbar" aria-label="하단 메뉴"></nav>
+
+<script src="js/sim.js?v=6"></script>
+<script src="js/api.js?v=6"></script>
+<script src="js/ui.js?v=6"></script>
+<script src="js/console.js?v=6"></script>
+</body>
+</html>

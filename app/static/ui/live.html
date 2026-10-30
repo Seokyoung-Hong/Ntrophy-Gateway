@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>공격자 화면 · 유출 키 체험</title>
+<meta name="description" content="발표 공격자용 채팅 페이지. 유출된 키로 공급자를 직접 호출하다가, 키가 폐기되는 순간 차단 알림을 받는다.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="css/app.css?v=6">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23f04452'/%3E%3Ccircle cx='12' cy='18' r='5' fill='none' stroke='white' stroke-width='3'/%3E%3Cpath d='m15.5 14.5 8-8' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
+</head>
+<body class="chat-body live-page" data-state="active">
+<div class="chat-app">
+  <header class="chat-top">
+    <div class="chat-top-row">
+      <h1>공격자 화면</h1>
+      <div class="spacer"></div>
+      <span class="badge ok live-status" id="keyStatus">사용 가능</span>
+    </div>
+    <div class="chat-stats">
+      <span class="badge ghost" id="stPeople">접속 0명</span>
+      <span class="badge ghost" id="stCalls">호출 0건</span>
+      <span class="badge ghost" id="stMode"></span>
+    </div>
+  </header>
+
+  <section class="chat-intro">
+    <h2>공개된 키로 AI를<br>마음껏 써 보세요</h2>
+    <p>누군가 저장소에 올려 버린 API 키예요. 이 페이지는 게이트웨이를 거치지 않고 공급자에 바로 호출해요.</p>
+    <div class="keycard"><small>유출된 키</small><div class="mono live-key" id="leakedKey">불러오는 중…</div><span class="badge bad" id="keyTag" hidden>폐기됨</span></div>
+  </section>
+
+  <div class="msgs live-messages" id="msgs" aria-live="polite"></div>
+  <div class="net-err" id="netErr" hidden><span>연결에 실패했어요</span><button class="btn sm gray" id="retry">다시 시도</button></div>
+  <div class="suggest" id="suggest"></div>
+
+  <div class="composer">
+    <form id="form">
+      <textarea id="input" class="live-input" rows="1" maxlength="300" placeholder="무엇이든 물어보세요" aria-label="메시지"></textarea>
+      <button class="btn send live-send" id="send" aria-label="보내기"></button>
+    </form>
+    <span class="count" id="count">0 / 300</span>
+  </div>
+</div>
+
+<div class="blocked" id="blocked" hidden role="alertdialog" aria-labelledby="blkT">
+  <div class="blocked-card">
+    <div class="blocked-ic" id="blkIc"></div>
+    <h2 id="blkT">차단되었습니다</h2>
+    <p>유출된 키가 감지되어<br>자동으로 폐기되었습니다.</p>
+    <span class="code">401 revoked</span>
+    <button class="btn lg block gray" id="blkClose">확인</button>
+    <button class="btn lg block" id="blkAgain" hidden>처음부터 다시 체험</button>
+  </div>
+</div>
+
+<script src="js/sim.js?v=6"></script>
+<script src="js/api.js?v=6"></script>
+<script src="js/ui.js?v=6"></script>
+<script src="js/live.js?v=6"></script>
+</body>
+</html>
