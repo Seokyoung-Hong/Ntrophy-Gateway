@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Gateway Test Page</title>
+</head>
+<body>
+<h1>Gateway Test Page</h1>
+<a href="/test/auto">자동 기능 점검 /test/auto</a>
+
+<h2>연결</h2>
+Base URL <input id="base" size="40"><br>
+Admin Key <input id="akey" size="30" value="admin"><br>
+Mock/라이브 서버 Base <input id="lbase" size="40"> <a id="livelink" href="#" target="_blank">/live</a><br>
+<button onclick="saveCfg();show('o_conn',await_(api('/admin/dashboard')))">연결 확인 (GET /admin/dashboard)</button>
+<pre id="o_conn"></pre>
+
+<h2>데모 제어</h2>
+<button onclick="doReset('/demo/reset')">/demo/reset</button>
+<button onclick="doReset('/demo/reset-openrouter')">/demo/reset-openrouter</button>
+<button onclick="doReset('/demo/reset-vllm')">/demo/reset-vllm</button>
+<button onclick="run('o_demo','/demo/wif/seed','POST')">/demo/wif/seed</button>
+<button onclick="run('o_demo','/demo/attack/start','POST')">공격 시작</button>
+<button onclick="run('o_demo','/demo/attack/stop','POST')">공격 중지</button>
+<button onclick="run('o_demo','/demo/honeypot/hit','POST')">/demo/honeypot/hit</button>
+<button onclick="run('o_demo','/demo/cleanup-openrouter','POST')">/demo/cleanup-openrouter</button>
+<pre id="o_demo"></pre>
+보관된 리셋 값(tokens / honeykeys / leaked_key):
+<pre id="o_saved"></pre>
+
+<h2>설정</h2>
+<button onclick="run('o_set','/admin/settings')">설정 조회</button>
+unauthorized_call_limit <input id="s_lim" size="8">
+loss_limit_krw <input id="s_loss" size="8">
+<button onclick="putSettings()">설정 변경 (PUT)</button><br>
+월 예산(KRW, 비우면 null) <input id="s_bud" size="10">
+<button onclick="run('o_set','/admin/usage/budget')">예산 조회</button>
+<button onclick="putBudget()">예산 변경 (PUT)</button>
+<pre id="o_set"></pre>
+
+<h2>관리</h2>
+<h3>크레덴셜</h3>
+<button onclick="run('o_adm','/admin/credentials')">목록</button>
+provider <input id="c_prov" value="mock" size="8">
+auth_mode <select id="c_mode"><option>API_KEY</option><option>WIF</option></select>
+role <select id="c_role"><option>STANDBY</option><option>PRIMARY</option></select>
+secret <input id="c_sec" size="20"> audience <input id="c_aud" size="10">
+<button onclick="addCred()">추가</button>
+id <input id="c_id" size="4"><button onclick="run('o_adm','/admin/credentials/'+v('c_id'),'DELETE')">폐기</button><br>
+OpenRouter provision: role <select id="p_role"><option>PRIMARY</option><option>STANDBY</option></select>
+limit_usd <input id="p_lim" value="0.5" size="5">
+<button onclick="run('o_adm','/admin/openrouter/provision','POST',{role:v('p_role'),limit_usd:parseFloat(v('p_lim'))})">provision</button>
+<h3>CIDR (비어 있으면 모두 허용, <code>*</code> = 전체 허용)</h3>
+<button onclick="run('o_adm','/admin/cidrs')">목록</button>
+cidr <input id="d_cidr" size="16"> label <input id="d_label" size="10">
+<button onclick="run('o_adm','/admin/cidrs','POST',{cidr:v('d_cidr'),label:v('d_label')})">추가</button>
+id <input id="d_id" size="4"><button onclick="run('o_adm','/admin/cidrs/'+v('d_id'),'DELETE')">삭제</button>
+<h3>서비스·토큰</h3>
+<button onclick="run('o_adm','/admin/services')">서비스/토큰 목록</button>
+service_name <input id="t_svc" size="10">
+<button onclick="run('o_adm','/admin/tokens','POST',{service_name:v('t_svc')})">토큰 발급</button>
+token id <input id="t_id" size="4"><button onclick="run('o_adm','/admin/tokens/'+v('t_id'),'DELETE')">토큰 폐기</button>
+service id <input id="sv_id" size="4">
+<button onclick="run('o_adm','/admin/services/'+v('sv_id')+'/suspend','POST')">정지</button>
+<button onclick="run('o_adm','/admin/services/'+v('sv_id')+'/resume','POST')">재개</button>
+<h3>신뢰 규칙 (/admin/trusted-identities)</h3>
+<button onclick="trusted('GET')">목록</button>
+JSON 본문 <input id="ti_body" size="50" value='{}'>
+<button onclick="trusted('POST')">추가(POST)</button>
+id <input id="ti_id" size="4"><button onclick="trusted('DELETE')">삭제</button>
+<h3>기타</h3>
+<button onclick="run('o_adm','/admin/honeykeys')">허니키 목록</button>
+<pre id="o_adm"></pre>
+
+<h2>사용자 채팅 (게이트웨이 /v1/chat/completions)</h2>
+토큰 선택 <select id="e_sel" onchange="el('e_tok').value=this.value"><option value="">(없음)</option></select>
+토큰 <input id="e_tok" size="40"><br>
+모델 <input id="e_model" value="gpt-4o-mini" size="16">
+X-Demo-Source-IP <input id="e_ip" size="14"><br>
+메시지 <input id="e_msg" value="안녕" size="40">
+<button onclick="chatOnce(v('e_tok'))">전송</button><br>
+자동 반복: 초당 <input id="e_rps" value="1" size="3">회
+<button onclick="autoStart()">시작</button><button onclick="autoStop()">중지</button>
+성공 <span id="e_ok">0</span> / 실패 <span id="e_fail">0</span> <button onclick="el('e_ok').textContent=0;el('e_fail').textContent=0">카운트 초기화</button>
+<pre id="o_chat"></pre>
+
+<h2>WIF 호출</h2>
+sub <input id="w_sub" value="svc-a" size="14">
+<button onclick="wifToken()">/demo/wif/token 으로 JWT 받기</button>
+<button onclick="chatOnce(v('w_jwt'),'o_wif')">이 JWT로 사용자 채팅 전송 (위 메시지/모델 사용)</button><br>
+JWT <input id="w_jwt" size="60">
+<pre id="o_wif"></pre>
+
+<h2>청중 채팅 (유출 키, Mock 서버 /live/*)</h2>
+<button onclick="liveCfg()">/live/config</button>
+key <input id="l_key" size="40"> 메시지 <input id="l_msg" value="안녕" size="30">
+<button onclick="liveChat()">전송 (/live/chat)</button>
+<pre id="o_lchat"></pre>
+<pre id="o_lblock" style="font-size:32px"></pre>
+/live/stats (2초 폴링) <pre id="o_lstats"></pre>
+
+<h2>실시간 모니터</h2>
+<label><input type="checkbox" id="mon_on" checked> 1초 폴링</label>
+<pre id="m_sum"></pre>
+<table border="1" id="m_cred"></table>
+honeykey_hits <pre id="m_hk"></pre>
+blocked_ips <pre id="m_ip"></pre>
+timeseries (최근 10개)
+<table border="1" id="m_ts"></table>
+events (최근 30개)
+<pre id="m_ev"></pre>
+access-denied (20개)
+<table border="1" id="m_ad"></table>
+incidents (클릭 시 상세)
+<table border="1" id="m_inc"></table>
+<pre id="m_incd"></pre>
+<table border="1" id="m_tl"></table>
+
+<h2>사용량</h2>
+range <select id="u_range"><option>day</option><option>week</option><option>month</option><option>all</option></select>
+bucket <select id="u_bucket"><option>hour</option><option>day</option></select>
+window_hours <input id="u_win" value="1" size="3">
+<button onclick="usage()">조회</button>
+<h3>summary</h3><table border="1" id="u_sum"></table>
+<h3>forecast</h3><table border="1" id="u_fc"></table><pre id="u_fc_raw"></pre>
+<h3>timeseries</h3><table border="1" id="u_ts"></table>
+<pre id="o_usage"></pre>
+
+<h2>API 콘솔</h2>
+<select id="x_method"><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option></select>
+경로 <input id="x_path" value="/admin/dashboard" size="40">
+<label><input type="checkbox" id="x_auth" checked> Admin Key 자동 포함</label><br>
+헤더(JSON) <input id="x_hdr" size="60" value="{}"><br>
+본문(JSON) <br><textarea id="x_body" rows="5" cols="70"></textarea><br>
+<button onclick="consoleSend()">전송</button>
+<pre id="o_console"></pre>
+
+<script>
+var el = function (i) { return document.getElementById(i); };
+var v = function (i) { return el(i).value; };
+var esc = function (s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;"); };
+var saved = { tokens: {}, honeykeys: {}, leaked_key: null };
+var cfgInit = function () {
+  var ls = {};
+  try { ls = JSON.parse(localStorage.getItem("gwtest") || "{}"); } catch (e) {}
+  el("base").value = ls.base || location.origin;
+  el("akey").value = ls.akey || "admin";
+  el("lbase").value = ls.lbase || location.origin;
+};
+function saveCfg() {
+  try { localStorage.setItem("gwtest", JSON.stringify({ base: v("base"), akey: v("akey"), lbase: v("lbase") })); } catch (e) {}
+  el("livelink").href = v("lbase").replace(/\/$/, "") + "/live";
+}
+function await_(p) { return p; }
+
+// 모든 호출의 공통 경로: 실패해도 {status, ok, text, json} 반환
+async function raw(url, method, body, headers) {
+  var opt = { method: method || "GET", headers: headers || {} };
+  if (body !== undefined && body !== null) {
+    opt.body = typeof body === "string" ? body : JSON.stringify(body);
+    if (!opt.headers["Content-Type"]) opt.headers["Content-Type"] = "application/json";
+  }
+  try {
+    var r = await fetch(url, opt);
+    var t = await r.text(), j = null;
+    try { j = JSON.parse(t); } catch (e) {}
+    return { status: r.status, ok: r.ok, text: t, json: j };
+  } catch (e) {
+    return { status: 0, ok: false, text: "NETWORK ERROR: " + e, json: null };
+  }
+}
+function api(path, method, body, noAuth, headers, base) {
+  var h = headers || {};
+  if (!noAuth && v("akey")) h["X-Admin-Key"] = v("akey");
+  return raw((base || v("base")).replace(/\/$/, "") + path, method, body, h);
+}
+function fmt(r) {
+  var t = r.json !== null ? JSON.stringify(r.json, null, 2) : r.text;
+  return "HTTP " + r.status + "\n" + t;
+}
+async function show(id, p) { var r = await p; el(id).textContent = fmt(r); return r; }
+function run(id, path, method, body) { return show(id, api(path, method, body)); }
+
+// ---- 데모
+async function doReset(path) {
+  var r = await run("o_demo", path, "POST");
+  if (r.json) {
+    saved.tokens = r.json.tokens || {};
+    saved.honeykeys = r.json.honeykeys || {};
+    saved.leaked_key = r.json.leaked_key || null;
+    el("o_saved").textContent = JSON.stringify(saved, null, 2);
+    var sel = el("e_sel");
+    sel.innerHTML = '<option value="">(없음)</option>';
+    Object.keys(saved.tokens).forEach(function (k) {
+      var o = document.createElement("option");
+      o.value = saved.tokens[k]; o.textContent = k + " " + saved.tokens[k];
+      sel.appendChild(o);
+    });
+    var first = Object.keys(saved.tokens)[0];
+    if (first) { sel.selectedIndex = 1; el("e_tok").value = saved.tokens[first]; }
+    if (saved.leaked_key) el("l_key").value = saved.leaked_key;
+  }
+}
+
+// ---- 설정
+async function putSettings() {
+  var b = {};
+  if (v("s_lim")) b.unauthorized_call_limit = parseInt(v("s_lim"), 10);
+  if (v("s_loss")) b.loss_limit_krw = parseInt(v("s_loss"), 10);
+  var r = await run("o_set", "/admin/settings", "PUT", b);
+  if (r.json && r.json.unauthorized_call_limit) { el("s_lim").value = r.json.unauthorized_call_limit; el("s_loss").value = r.json.loss_limit_krw; }
+}
+function putBudget() {
+  var x = v("s_bud").trim();
+  return run("o_set", "/admin/usage/budget", "PUT", { monthly_budget_krw: x === "" ? null : parseInt(x, 10) });
+}
+
+// ---- 관리
+function addCred() {
+  var b = { provider: v("c_prov"), auth_mode: v("c_mode"), role: v("c_role") };
+  if (v("c_sec")) b.secret = v("c_sec");
+  if (v("c_aud")) b.audience = v("c_aud");
+  return run("o_adm", "/admin/credentials", "POST", b);
+}
+async function trusted(m) {
+  var path = "/admin/trusted-identities" + (m === "DELETE" ? "/" + v("ti_id") : "");
+  var body = m === "POST" ? v("ti_body") : undefined;
+  var r = await api(path, m, body);
+  el("o_adm").textContent = r.status === 404 ? "미지원 (404)\n" + r.text : fmt(r);
+}
+
+// ---- 사용자 채팅
+async function chatOnce(token, outId) {
+  outId = outId || "o_chat";
+  var h = { Authorization: "Bearer " + token };
+  if (v("e_ip")) h["X-Demo-Source-IP"] = v("e_ip");
+  var r = await api("/v1/chat/completions", "POST",
+    { model: v("e_model"), messages: [{ role: "user", content: v("e_msg") }], max_tokens: 50 }, true, h);
+  var reply = "", err = "";
+  if (r.json) {
+    try { reply = r.json.choices[0].message.content; } catch (e) {}
+    if (r.json.error) err = typeof r.json.error === "string" ? r.json.error : JSON.stringify(r.json.error);
+  }
+  var ok = r.status === 200;
+  var c = el(ok ? "e_ok" : "e_fail"); c.textContent = parseInt(c.textContent, 10) + 1;
+  el(outId).textContent = "HTTP " + r.status + (err ? " error=" + err : "") + "\n응답: " + reply + "\n\n" + r.text;
+  return r;
+}
+var autoT = null;
+function autoStart() {
+  autoStop();
+  var n = Math.max(0.1, parseFloat(v("e_rps")) || 1);
+  autoT = setInterval(function () { chatOnce(v("e_tok")); }, 1000 / n);
+}
+function autoStop() { if (autoT) clearInterval(autoT); autoT = null; }
+
+// ---- WIF
+async function wifToken() {
+  var r = await show("o_wif", api("/demo/wif/token", "POST", { sub: v("w_sub") }));
+  if (r.json) {
+    var t = r.json.token || r.json.jwt || r.json.access_token;
+    if (t) el("w_jwt").value = t;
+  }
+}
+
+// ---- 청중 채팅
+function lapi(path, m, b) { return api(path, m, b, true, {}, v("lbase")); }
+async function liveCfg() {
+  var r = await show("o_lchat", lapi("/live/config"));
+  if (r.json && r.json.key) el("l_key").value = r.json.key;
+}
+async function liveChat() {
+  var r = await show("o_lchat", lapi("/live/chat", "POST", { key: v("l_key"), message: v("l_msg") }));
+  el("o_lblock").textContent = r.status === 401 ? "차단되었습니다" : "";
+}
+async function liveStats() {
+  var r = await lapi("/live/stats");
+  el("o_lstats").textContent = fmt(r);
+  if (r.json && r.json.key_status === "revoked") el("o_lblock").textContent = "차단되었습니다";
+}
+
+// ---- 모니터
+function cell(x) { return "<td>" + esc(typeof x === "object" && x !== null ? JSON.stringify(x) : x) + "</td>"; }
+function table(id, cols, rows, onclickKey) {
+  var h = "<tr>" + cols.map(function (c) { return "<th>" + esc(c) + "</th>"; }).join("") + "</tr>";
+  rows.forEach(function (r) {
+    h += "<tr" + (onclickKey ? ' onclick="incDetail(' + r[onclickKey] + ')"' : "") + ">" +
+      cols.map(function (c) { return cell(r[c]); }).join("") + "</tr>";
+  });
+  el(id).innerHTML = h;
+}
+var lastEv = 0, evLines = [];
+async function monitor() {
+  if (!el("mon_on").checked) return;
+  var d = await api("/admin/dashboard");
+  if (d.json && d.json.status !== undefined) {
+    var j = d.json;
+    el("m_sum").textContent =
+      "status=" + j.status + " attack_running=" + j.attack_running + " incident_id=" + j.incident_id + "\n" +
+      "diff_calls=" + j.diff_calls + " limit_calls=" + j.limit_calls + " (warn_at=" + j.warn_at_calls + ", block_at=" + j.block_at_calls + ")\n" +
+      "gateway_calls=" + j.gateway_calls + " provider_calls=" + j.provider_calls + "\n" +
+      "active_credential=" + JSON.stringify(j.active_credential) + "\nupdated_at=" + j.updated_at;
+    table("m_cred", ["id", "provider", "auth_mode", "role", "status", "masked", "gateway_calls", "provider_calls", "diff_calls", "calls_estimated"], j.credentials || []);
+    el("m_hk").textContent = JSON.stringify(j.honeykey_hits, null, 1);
+    el("m_ip").textContent = JSON.stringify(j.blocked_ips, null, 1);
+  } else { el("m_sum").textContent = fmt(d); }
+
+  var t = await api("/admin/timeseries?range=300");
+  if (t.json && t.json.points) table("m_ts", ["t", "gateway_calls", "provider_calls", "gateway_krw", "provider_krw"], t.json.points.slice(-10));
+
+  var e = await api("/admin/events?since_id=" + lastEv);
+  if (e.json && e.json.events) {
+    e.json.events.forEach(function (x) {
+      lastEv = Math.max(lastEv, x.id);
+      evLines.push(x.id + " " + x.at + " " + x.kind + " " + x.message);
+    });
+    evLines = evLines.slice(-30);
+    el("m_ev").textContent = evLines.join("\n");
+  }
+
+  var a = await api("/admin/access-denied?limit=20");
+  if (a.json && Array.isArray(a.json)) table("m_ad", ["id", "at", "source_ip", "reason", "token_masked"], a.json);
+
+  var i = await api("/admin/incidents");
+  if (i.json && Array.isArray(i.json)) table("m_inc", ["id", "status", "trigger_type", "credential_masked", "detected_at", "blocked_at", "resolved_at", "loss_calls", "limit_calls"], i.json, "id");
+}
+async function incDetail(id) {
+  var r = await api("/admin/incidents/" + id);
+  el("m_incd").textContent = fmt(r);
+  if (r.json && r.json.timeline) table("m_tl", ["at", "step", "detail", "ok"], r.json.timeline);
+}
+
+// ---- 사용량
+async function usage() {
+  var rg = v("u_range");
+  var s = await api("/admin/usage/summary?range=" + rg);
+  if (s.json && s.json.total) {
+    var rows = [Object.assign({ name: "TOTAL", model: "" }, s.json.total)];
+    (s.json.services || []).forEach(function (sv) {
+      rows.push(Object.assign({ name: sv.name, model: "" }, sv));
+      (sv.models || []).forEach(function (m) { rows.push(Object.assign({ name: "  " + sv.name }, m)); });
+    });
+    table("u_sum", ["name", "model", "calls", "input_tokens", "output_tokens", "cost_krw", "estimated_cost_krw", "estimated"], rows);
+  } else el("o_usage").textContent = fmt(s);
+  var f = await api("/admin/usage/forecast?window_hours=" + v("u_win"));
+  if (f.json && f.json.rate_per_hour) {
+    var j = f.json;
+    el("u_fc").innerHTML = "<tr><th>항목</th><th>값</th></tr>" + [
+      ["rate_per_hour.calls", j.rate_per_hour.calls], ["rate_per_hour.tokens", j.rate_per_hour.tokens],
+      ["rate_per_hour.cost_krw", j.rate_per_hour.cost_krw],
+      ["projected.end_of_day_cost_krw", j.projected.end_of_day_cost_krw],
+      ["projected.end_of_month_cost_krw", j.projected.end_of_month_cost_krw],
+      ["budget.monthly_budget_krw", j.budget.monthly_budget_krw], ["budget.hours_to_budget", j.budget.hours_to_budget],
+      ["method", j.method]].map(function (r) { return "<tr><td>" + r[0] + "</td>" + cell(r[1]) + "</tr>"; }).join("");
+    el("u_fc_raw").textContent = JSON.stringify(j.per_service, null, 1) + "\n" + (j.note || "");
+  } else el("u_fc_raw").textContent = fmt(f);
+  var t = await api("/admin/usage/timeseries?range=" + rg + "&bucket=" + v("u_bucket"));
+  if (t.json && t.json.services) {
+    var tr = [];
+    t.json.services.forEach(function (sv) { sv.points.forEach(function (p) { tr.push({ service: sv.name, t: p.t, calls: p.calls, tokens: p.tokens, cost_krw: p.cost_krw }); }); });
+    table("u_ts", ["service", "t", "calls", "tokens", "cost_krw"], tr);
+  } else el("o_usage").textContent += "\n" + fmt(t);
+}
+
+// ---- 콘솔
+async function consoleSend() {
+  var h = {};
+  try { h = JSON.parse(v("x_hdr") || "{}"); } catch (e) { el("o_console").textContent = "헤더 JSON 오류: " + e; return; }
+  var b = v("x_body").trim();
+  var m = v("x_method");
+  await show("o_console", api(v("x_path"), m, (b && m !== "GET") ? b : undefined, !el("x_auth").checked, h));
+}
+
+cfgInit(); saveCfg();
+["base", "akey", "lbase"].forEach(function (i) { el(i).addEventListener("change", saveCfg); });
+setInterval(function () { monitor().catch(function (e) { el("m_sum").textContent = "monitor error: " + e; }); }, 1000);
+setInterval(function () { liveStats().catch(function () {}); }, 2000);
+</script>
+</body>
+</html>

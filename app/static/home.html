@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ntrophy Gateway</title>
+<link rel="icon" type="image/png" href="ui/assets/logo-mark.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+/* 토큰은 ui/css/app.css (tasteskill · framed-sheet)와 같은 값 */
+:root { --bg:#f1f4f7; --surface:#fff; --surface-2:#f6f8fa; --line:#e4e8ec; --line-strong:#c9cfd5; --ink:#131416; --ink-2:#3d4045; --ink-3:#5b6066; --brand:#2f70bb; --brand-soft:#eaf1f9; --bad:#c4242a; --bad-soft:#ffedea; --on-bad:#fff;
+  --font:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",Roboto,"Noto Sans KR",sans-serif; color-scheme:light; }
+@media (prefers-color-scheme: dark) { :root { --bg:#161718; --surface:#0d0e0f; --surface-2:#18191b; --line:#26282b; --line-strong:#3d4045; --ink:#f2f3f4; --ink-2:#c8cbce; --ink-3:#a0a5aa; --brand:#6aa0e0; --brand-soft:#16233a; --bad:#e5566f; --bad-soft:#2c1a20; --on-bad:#111214; color-scheme:dark; } }
+* { box-sizing:border-box; }
+html, body { height:100%; margin:0; }
+body { height:100dvh; overflow:hidden; background:var(--bg); color:var(--ink); font-family:var(--font); display:flex; flex-direction:column; padding-top:max(0px, env(safe-area-inset-top)); }
+.top { height:48px; flex:none; display:flex; align-items:center; gap:8px; padding:0 16px; font-weight:700; font-size:15px; letter-spacing:-.02em; }
+.top img { width:24px; height:24px; display:block; }
+.sheet { flex:1; min-height:0; margin:0 8px max(8px, env(safe-area-inset-bottom)) 8px; background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:20px 16px 16px; display:flex; flex-direction:column; gap:16px; }
+h1 { margin:0; font-size:22px; letter-spacing:-.03em; line-height:1.3; }
+h1 small { display:block; margin-top:6px; font-size:14px; font-weight:500; color:var(--ink-3); letter-spacing:0; }
+nav { flex:1; min-height:0; display:grid; grid-template-rows:repeat(3,1fr); gap:12px; }
+a { display:flex; flex-direction:column; justify-content:center; gap:6px; padding:0 20px; border-radius:8px; background:var(--surface); border:1px solid var(--line-strong); color:inherit; text-decoration:none; position:relative; }
+a b { font-size:22px; letter-spacing:-.03em; }
+a span { font-size:14px; color:var(--ink-3); line-height:1.4; }
+a::after { content:"→"; position:absolute; right:20px; top:50%; transform:translateY(-50%); font-size:20px; color:var(--ink-3); }
+a:hover, a:focus-visible { background:var(--surface-2); outline:none; border-color:var(--ink); }
+a.dash { border-color:var(--brand); } a.dash b { color:var(--brand); } a.dash:hover { background:var(--brand-soft); }
+a.atk { background:var(--bad); border-color:var(--bad); color:var(--on-bad); }
+a.atk span, a.atk::after { color:inherit; opacity:.85; } a.atk:hover { background:var(--bad); filter:brightness(1.08); }
+@media (min-width:760px) {
+  .sheet { padding:40px; gap:32px; }
+  h1 { font-size:30px; }
+  nav { grid-template-rows:none; grid-template-columns:repeat(3,1fr); gap:20px; max-height:360px; margin:auto 0; }
+  a { padding:0 28px; } a b { font-size:28px; } a span { font-size:15px; padding-right:28px; }
+}
+</style>
+</head>
+<body>
+<div class="top"><img src="ui/assets/logo-mark.png" alt="" width="24" height="24">Ntrophy Gateway</div>
+<main class="sheet">
+  <h1>어디로 들어갈까요?<small>AI API 키 유출을 사용량 대조로 탐지하고 자동 차단해요</small></h1>
+  <nav>
+    <a class="dash" href="ui/index.html" data-s><b>대시보드</b><span>대표 · 실시간 탐지와 차단 현황</span></a>
+    <a href="ui/employee.html" data-s><b>직원 사용자</b><span>게이트웨이로 채팅 · 끊김 없이 계속</span></a>
+    <a class="atk" href="ui/live.html" data-s><b>공격자</b><span>유출된 키로 직접 호출 · 곧 차단됩니다</span></a>
+  </nav>
+</main>
+<script>document.querySelectorAll('a[data-s]').forEach(a => a.search = '?server=' + encodeURIComponent(location.origin));</script>
+</body>
+</html>
